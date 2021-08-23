@@ -933,6 +933,34 @@ describe("formatting", () => {
 
             expect(result).toMatch(/^%/);
         });
+
+        it("puts percent sign inside the parenthesis for negative numbers, when prefixSymbol is truthy", () => {
+            let instance = numbroStub(-.5);
+            let providedFormat = jasmine.createSpy("providedFormat");
+            let state = jasmine.createSpyObj("state", ["currentAbbreviations", "currentPercentageDefaults"]);
+
+            state.currentAbbreviations.and.returnValue({});
+            providedFormat.negative = "parenthesis";
+            providedFormat.spaceSeparated = false;
+            providedFormat.prefixSymbol = true;
+            formatNumber.and.returnValue("(output)");
+            let result = formatPercentage(instance, providedFormat, state, numbroStub);
+            expect(result).toBe("(%output)");
+        });
+
+          it("puts percent sign inside the parenthesis for negative numbers, when prefixSymbol is falsy", () => {
+            let instance = numbroStub(-.5);
+            let providedFormat = jasmine.createSpy("providedFormat");
+            let state = jasmine.createSpyObj("state", ["currentAbbreviations", "currentPercentageDefaults"]);
+
+            state.currentAbbreviations.and.returnValue({});
+            providedFormat.negative = "parenthesis";
+            providedFormat.spaceSeparated = false;
+            providedFormat.prefixSymbol = false;
+            formatNumber.and.returnValue("(output)");
+            let result = formatPercentage(instance, providedFormat, state, numbroStub);
+            expect(result).toBe("(output%)");
+        });
     });
 
     describe("formatCurrency", () => {
@@ -1123,6 +1151,22 @@ describe("formatting", () => {
             formatCurrency(instance, providedFormat, state);
             expect(formatNumber.calls.argsFor(0)[0].providedFormat.lowPrecision).toBe(true);
         });
+
+        it("puts symbol inside the parenthesis for negative numbers, when position is prefix", () => {
+            let instance = numbroStub(-1000);
+            let providedFormat = jasmine.createSpy("providedFormat");
+            let state = jasmine.createSpyObj("state", ["currentCurrencyDefaults", "currentCurrency"]);
+
+            state.currentCurrency.and.returnValue({
+                position: "prefix",
+                spaceSeparated: false,
+                symbol: "$"
+            });
+            providedFormat.negative = "parenthesis";
+            formatNumber.and.returnValue("(output)");
+            let result = formatCurrency(instance, providedFormat, state);
+            expect(result).toBe("($output)");
+      });
     });
 
     describe("computeAverage", () => {

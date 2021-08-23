@@ -282,10 +282,18 @@ function formatPercentage(instance, providedFormat, state, numbro) {
     let options = Object.assign({}, defaultOptions, providedFormat);
 
     if (prefixSymbol) {
-        return `%${options.spaceSeparated ? " " : ""}${output}`;
+        if (instance._value < 0 && options.negative === "parenthesis"){
+            return `(%${options.spaceSeparated ? " " : ""}${output.slice(1)}`;
+        } else {
+            return `%${options.spaceSeparated ? " " : ""}${output}`;
+        }
     }
 
-    return `${output}${options.spaceSeparated ? " " : ""}%`;
+    if (instance._value < 0 && options.negative === "parenthesis"){
+        return `${output.slice(0, -1)}${options.spaceSeparated ? " " : ""}%)`;
+    } else {
+        return `${output}${options.spaceSeparated ? " " : ""}%`;
+    }
 }
 
 /**
@@ -331,6 +339,8 @@ function formatCurrency(instance, providedFormat, state) {
     if (position === "prefix") {
         if (instance._value < 0 && options.negative === "sign") {
             output = `-${space}${symbol}${output.slice(1)}`;
+        } else if (instance._value < 0 && options.negative === "parenthesis") {
+            output = `(${symbol}${space}${output.slice(1)}`;
         } else if (instance._value > 0 && options.forceSign) {
             output = `+${space}${symbol}${output.slice(1)}`;
         } else {
@@ -339,8 +349,12 @@ function formatCurrency(instance, providedFormat, state) {
     }
 
     if (!position || position === "postfix") {
-        space = !options.spaceSeparatedAbbreviation && average ? "" : space;
-        output = output + space + symbol;
+        if (instance._value < 0 && options.negative === "parenthesis") {
+            output = `${output.slice(0, -1)}${space}${symbol})`
+        } else {
+            space = !options.spaceSeparatedAbbreviation && average ? "" : space;
+            output = output + space + symbol;
+        }
     }
 
     return output;
